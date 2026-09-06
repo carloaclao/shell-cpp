@@ -12,6 +12,7 @@ private:
     std::map<std::string, std::function<void(const Args& arguments)>> availableCommands;
     std::map<std::string, std::string> commandTypes;
 
+    bool isCommandInPath(const std::string& command, std::string& commandPath);
     void registerCommands();
     void addCommand(std::string command, std::string type, std::function<void(const Args& arguments)> handler);
     void handleCommand(const std::string rawCommand); 

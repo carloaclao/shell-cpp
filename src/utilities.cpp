@@ -1,4 +1,6 @@
 #include <vector>
+#include <cstdlib>
+
 #include "utilities.h"
 
 // Given a string and a sperator, returns a vector of strings that are split by seperator
@@ -23,4 +25,9 @@ std::vector<std::string> split(char separator, const std::string& input) {
     result.emplace_back(input.substr(start, curr - start));
 
   return result;
+}
+
+std::string getEnvVar(const std::string& key) {
+  const char* val = std::getenv(key.c_str());
+  return (val == nullptr) ? "" : std::string(val);
 }

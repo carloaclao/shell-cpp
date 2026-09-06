@@ -1,7 +1,10 @@
 #include <iostream>
+#include <filesystem>
 
 #include "utilities.h"
 #include "shell.h"
+
+namespace fs = std::filesystem;
 
 // splits user input on " " and finds the command and arguments
 // since split doesn't split on just all spaces, an extra check is added to 
@@ -35,9 +38,39 @@ void Shell::handleCommand(const std::string rawCommand) {
   }
 }
 
+// adds a command to the available and types registry
 void Shell::addCommand(std::string command, std::string type, std::function<void(const Args& arguments)> handler) {
   availableCommands.emplace(command, handler);
   commandTypes.emplace(command, type);
+}
+
+// checks to see if the command is found in a path and has executable permissions
+// if it is found and has permissions returns true
+// other wise returns false
+bool Shell::isCommandInPath(const std::string& command, std::string& commandPath) {
+  std::string pathVar = getEnvVar("PATH");
+  std::vector<std::string> paths = split(':', pathVar);
+  
+  for (auto path : paths) {
+    if (fs::exists(path)) {
+      for (const auto& entry : fs::directory_iterator(path)) {
+        // skip file thats not command
+        std::string filename = entry.path().filename();
+        if (command != entry.path().filename()) continue;
+
+
+        fs::file_status status = fs::status(path);
+        fs::perms permissions = status.permissions();
+        // checking for execution permissions
+        if ((permissions & fs::perms::owner_exec) != fs::perms::none) {
+          commandPath = path;
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 void Shell::registerCommands() {
@@ -61,7 +94,12 @@ void Shell::registerCommands() {
     if (type != commandTypes.end()) {
       std::cout << commandToCheck << " is a shell " << type->second << std::endl;
     } else {
-      std::cout << commandToCheck << ": not found" << std::endl;
+      std::string commandPath {};
+      if (isCommandInPath(commandToCheck, commandPath)) {
+        std::cout << commandToCheck << " is " << commandPath << std::endl;
+      } else {
+        std::cout << commandToCheck << ": not found" << std::endl;
+      }
     }
   });
 }
