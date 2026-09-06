@@ -63,7 +63,7 @@ bool Shell::isCommandInPath(const std::string& command, std::string& commandPath
         fs::perms permissions = status.permissions();
         // checking for execution permissions
         if ((permissions & fs::perms::owner_exec) != fs::perms::none) {
-          commandPath = path;
+          commandPath = entry.path();
           return true;
         }
       }
