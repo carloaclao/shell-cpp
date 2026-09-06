@@ -67,6 +67,8 @@ bool Shell::isCommandInPath(const std::string& command, std::string& commandPath
         ) {
           commandPath = entry.path();
           return true;
+        } else {
+          return false;
         }
       }
     }
