@@ -58,7 +58,7 @@ bool Shell::isCommandInPath(const std::string& command, std::string& commandPath
         std::string filename = entry.path().filename();
         if (command != entry.path().filename()) continue;
 
-        fs::file_status status = fs::status(path);
+        fs::file_status status = fs::status(entry);
         fs::perms permissions = status.permissions();
         // checking for execution permissions
         if (((permissions & fs::perms::owner_exec) != fs::perms::none) ||
@@ -67,9 +67,7 @@ bool Shell::isCommandInPath(const std::string& command, std::string& commandPath
         ) {
           commandPath = entry.path();
           return true;
-        } else {
-          return false;
-        }
+        } 
       }
     }
   }
