@@ -34,7 +34,14 @@ void Shell::handleCommand(const std::string rawCommand) {
   if (it != availableCommands.end()) {
     it->second(arguments);
   } else {
-    std::cout << command << ": command not found" << std::endl;
+    fs::directory_entry commandEntry {};
+    if (isCommandInPath(command, commandEntry)) {
+      std::string commandToExecute = "cd " + commandEntry.path().parent_path().string() + " && " + commandEntry.path().filename().string() + " " + join(arguments, ' ');
+      //std::cout << commandToExecute << std::endl;
+      std::system(commandToExecute.c_str());
+    } else {
+      std::cout << command << ": command not found" << std::endl;
+    }
   }
 }
 
@@ -47,7 +54,7 @@ void Shell::addCommand(std::string command, std::string type, std::function<void
 // checks to see if the command is found in a path and has executable permissions
 // if it is found and has permissions returns true
 // other wise returns false
-bool Shell::isCommandInPath(const std::string& command, std::string& commandPath) {
+bool Shell::isCommandInPath(const std::string& command, fs::directory_entry& commandEntry) {
   std::string pathVar = getEnvVar("PATH");
   std::vector<std::string> paths = split(':', pathVar);
   
@@ -65,7 +72,7 @@ bool Shell::isCommandInPath(const std::string& command, std::string& commandPath
             ((permissions & fs::perms::group_exec) != fs::perms::none) || 
             ((permissions & fs::perms::others_exec) != fs::perms::none) 
         ) {
-          commandPath = entry.path();
+          commandEntry = entry;
           return true;
         } 
       }
@@ -96,9 +103,9 @@ void Shell::registerCommands() {
     if (type != commandTypes.end()) {
       std::cout << commandToCheck << " is a shell " << type->second << std::endl;
     } else {
-      std::string commandPath {};
-      if (isCommandInPath(commandToCheck, commandPath)) {
-        std::cout << commandToCheck << " is " << commandPath << std::endl;
+      fs::directory_entry commandEntry {};
+      if (isCommandInPath(commandToCheck, commandEntry)) {
+        std::cout << commandToCheck << " is " << commandEntry.path().string() << std::endl;
       } else {
         std::cout << commandToCheck << ": not found" << std::endl;
       }

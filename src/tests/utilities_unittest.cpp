@@ -32,4 +32,10 @@ namespace {
     ASSERT_EQ(res.size(), 3);
     EXPECT_EQ(res.at(2), "testing");
   }
+
+  TEST(JoinTest, SimpleJoin) {
+    std::vector<std::string> simple = {"hello", "world", "test"};
+    std::string res = join(simple, ' ');
+    EXPECT_EQ(res, "hello world test");
+  }
 }
